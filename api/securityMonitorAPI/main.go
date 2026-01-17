@@ -2,28 +2,26 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"securityMonitorAPI/structs"
-	_ "strconv"
 
 	"github.com/gorilla/mux"
 )
 
-var packets []structs.Packet
+var packets []structs.PacketWindow
 
 func createPacket(w http.ResponseWriter, r *http.Request) {
-	var packet structs.Packet
-	_ = json.NewDecoder(r.Body).Decode(&packet)
-
-	packets = append(packets, packet)
-
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(packet)
-	if err != nil {
+	var packetWindow structs.PacketWindow
+	if err := json.NewDecoder(r.Body).Decode(&packetWindow); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	packets = append(packets, packetWindow)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(packetWindow)
 }
 
 func main() {
@@ -31,6 +29,6 @@ func main() {
 
 	r.HandleFunc("/api/packets", createPacket).Methods("POST")
 
-	fmt.Println("Server is running on port 8000...")
+	log.Println("Server starting on port 8000")
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
