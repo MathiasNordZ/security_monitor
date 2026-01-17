@@ -1,11 +1,13 @@
 from CaptureEngine import CaptureEngine
-from DetectionEngine import DetectionEngine
+from NormalizePacket import NormalizePacket
+from Request import sendNormalizedPacket
 
 def main():
-    captureEngine = CaptureEngine("lo")
-    detectionEngine = DetectionEngine()
-    
-    callback = detectionEngine.detector
+    interface = "en0"
+    captureEngine = CaptureEngine(interface)
+    normalizer = NormalizePacket(sensor=interface)
+    callback = sendNormalizedPacket(normalizer=normalizer, apiUrl="http://localhost:8000/api/packets")
+
     captureEngine.start(callback_func=callback, bpf_filter="ip")
 
 if __name__ == "__main__":
